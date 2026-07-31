@@ -1,0 +1,348 @@
+{
+  "$comment": "Orbital Claim - balance data. Original values; the 2009 game's numbers were never published and are not used here. Distances are world units (1 unit = 1 px at zoom 1). Times are seconds.",
+  "resources": {
+    "minerals": {
+      "start": 300,
+      "note": "uncapped: a ceiling only produced storage-depot busywork"
+    },
+    "power": {
+      "start": 0,
+      "note": "power is a live supply/demand balance per grid island, not a stockpile"
+    }
+  },
+  "grid": {
+    "$comment": "Structures must be inside the powered network or they idle at 0% rate.",
+    "linkRange": 170,
+    "relayMaxLinks": 6,
+    "solarMaxLinks": 12,
+    "hubMaxLinks": 12,
+    "brownoutBehaviour": "If demand exceeds supply, every consumer runs at supply/demand rate."
+  },
+  "buildings": {
+    "miner": {
+      "name": "Mineral Miner",
+      "sprite": "miner",
+      "radius": 20,
+      "cost": 120,
+      "power": -6,
+      "hp": 320,
+      "buildTime": 2.5,
+      "range": 130,
+      "mineRate": 4.0,
+      "desc": "Extracts ore from every asteroid in range. Rate splits across asteroids; asteroids deplete.",
+      "maxLinks": 1
+    },
+    "solar": {
+      "name": "Solar Station",
+      "sprite": "solar",
+      "radius": 18,
+      "cost": 100,
+      "power": 20,
+      "hp": 260,
+      "buildTime": 2.0,
+      "desc": "Generates power and anchors the grid. Accepts many links.",
+      "upgrades": [
+        {
+          "name": "Solar Array II",
+          "cost": 160,
+          "time": 4.0,
+          "sprite": "solar-4",
+          "power": 40,
+          "hp": 320,
+          "radius": 18.5,
+          "desc": "Four panels. Doubles output for one grid slot."
+        },
+        {
+          "name": "Solar Array III",
+          "cost": 300,
+          "time": 6.0,
+          "sprite": "solar-6",
+          "power": 60,
+          "hp": 380,
+          "radius": 19,
+          "desc": "Six panels. Triples output, but the last tier is the priciest per point."
+        }
+      ]
+    },
+    "relay": {
+      "name": "Energy Relay",
+      "sprite": "relay",
+      "radius": 16,
+      "cost": 45,
+      "power": -1,
+      "hp": 180,
+      "buildTime": 1.2,
+      "desc": "Cheap grid extender. Limited to 6 links, so plan trunk lines."
+    },
+    "laser": {
+      "name": "Basic Laser",
+      "sprite": "laser",
+      "radius": 18,
+      "cost": 80,
+      "power": -8,
+      "hp": 260,
+      "buildTime": 1.8,
+      "range": 165,
+      "beam": true,
+      "dps": 14,
+      "refundRatio": 1.0,
+      "desc": "Continuous cutting beam. Never misses, but wears targets down slowly. Full refund on sell.",
+      "maxLinks": 1
+    },
+    "pulser": {
+      "name": "Pulser",
+      "sprite": "pulser",
+      "radius": 18,
+      "cost": 180,
+      "power": -14,
+      "hp": 300,
+      "buildTime": 2.4,
+      "range": 210,
+      "damage": 7,
+      "fireRate": 4.0,
+      "projectile": "bolt",
+      "desc": "Higher sustained damage and reach. Power hungry.",
+      "maxLinks": 1
+    },
+    "missileBay": {
+      "name": "Missile Battery",
+      "sprite": "missile-bay",
+      "radius": 20,
+      "cost": 260,
+      "power": -12,
+      "hp": 340,
+      "buildTime": 3.0,
+      "range": 290,
+      "damage": 40,
+      "splash": 70,
+      "fireRate": 0.5,
+      "projectile": "missile",
+      "minRange": 60,
+      "ammoCost": 9,
+      "desc": "Long range splash, but every missile costs minerals. Goes quiet if you run dry.",
+      "maxLinks": 1
+    },
+    "battery": {
+      "name": "Battery Bank",
+      "sprite": "battery",
+      "radius": 19,
+      "cost": 140,
+      "power": 0,
+      "hp": 240,
+      "buildTime": 2.2,
+      "capacity": 240,
+      "chargeRate": 14,
+      "dischargeRate": 30,
+      "desc": "Stores surplus power and covers deficits, so a spike browns out the bank instead of the base.",
+      "upgrades": [
+        {
+          "name": "Battery Bank II",
+          "cost": 220,
+          "time": 4.5,
+          "sprite": "battery-2",
+          "hp": 300,
+          "radius": 20,
+          "capacity": 960,
+          "chargeRate": 28,
+          "dischargeRate": 60,
+          "desc": "Second cell column. Four times the storage."
+        }
+      ]
+    },
+    "repair": {
+      "name": "Repair Station",
+      "sprite": "repair",
+      "radius": 20,
+      "cost": 200,
+      "power": -10,
+      "hp": 280,
+      "buildTime": 2.6,
+      "range": 260,
+      "healRate": 16,
+      "botCount": 4,
+      "botHp": 40,
+      "botSpeed": 105,
+      "botRebuildTime": 6,
+      "botRechargeRate": 14,
+      "botRecallAt": 0.2,
+      "desc": "Launches four repair drones to patch damaged structures. Drones can be shot down and are rebuilt with power."
+    }
+  },
+  "enemies": {
+    "fighter": {
+      "name": "Fighter",
+      "sprite": "fighter",
+      "radius": 12,
+      "hp": 45,
+      "speed": 62,
+      "damage": 6,
+      "fireRate": 1.4,
+      "range": 90,
+      "bounty": 8,
+      "desc": "Fast and fragile. Dangerous only in numbers."
+    },
+    "swarmer": {
+      "name": "Swarmer",
+      "sprite": "swarmer",
+      "radius": 8,
+      "hp": 18,
+      "speed": 88,
+      "damage": 3,
+      "fireRate": 2.0,
+      "range": 60,
+      "bounty": 3,
+      "desc": "Tiny and quick, arrives in large packs. Punishes single-target turrets."
+    },
+    "missileShip": {
+      "name": "Missile Ship",
+      "sprite": "missile-ship",
+      "radius": 14,
+      "hp": 120,
+      "speed": 42,
+      "damage": 22,
+      "fireRate": 0.6,
+      "range": 200,
+      "bounty": 20,
+      "desc": "Outranges basic lasers. Must be pushed with pulsers or missiles."
+    },
+    "exploder": {
+      "name": "Exploder",
+      "sprite": "exploder",
+      "radius": 14,
+      "hp": 90,
+      "speed": 74,
+      "damage": 120,
+      "splash": 90,
+      "range": 0,
+      "bounty": 18,
+      "suicide": true,
+      "desc": "Rams the nearest structure and detonates. Kill it at distance."
+    },
+    "ringShip": {
+      "name": "Ring Ship",
+      "sprite": "ring-ship",
+      "radius": 18,
+      "hp": 200,
+      "shield": 250,
+      "shieldRegen": 8,
+      "speed": 34,
+      "damage": 14,
+      "fireRate": 1.0,
+      "range": 150,
+      "bounty": 35,
+      "desc": "Regenerating shield. Needs burst damage rather than chip damage."
+    },
+    "mothership": {
+      "name": "Mothership",
+      "sprite": "mothership",
+      "radius": 30,
+      "hp": 2200,
+      "speed": 20,
+      "damage": 30,
+      "fireRate": 0.8,
+      "range": 230,
+      "bounty": 250,
+      "spawns": {
+        "type": "swarmer",
+        "every": 4.0,
+        "count": 2
+      },
+      "desc": "Wave boss. Tanky, and it keeps launching swarmers while it closes."
+    }
+  },
+  "waves": {
+    "$comment": "Waves are telegraphed: the spawn bearing and composition are shown during the build window. The first window is much longer so a new base can actually get established.",
+    "firstWindow": 75,
+    "buildWindow": 25,
+    "multiDirectionFrom": 12,
+    "maxDirections": 4,
+    "list": [
+      {
+        "n": 1,
+        "spawn": [
+          "fighter x4"
+        ]
+      },
+      {
+        "n": 2,
+        "spawn": [
+          "fighter x7"
+        ]
+      },
+      {
+        "n": 3,
+        "spawn": [
+          "fighter x6",
+          "swarmer x8"
+        ]
+      },
+      {
+        "n": 4,
+        "spawn": [
+          "swarmer x16"
+        ]
+      },
+      {
+        "n": 5,
+        "spawn": [
+          "fighter x8",
+          "missileShip x2"
+        ]
+      },
+      {
+        "n": 6,
+        "spawn": [
+          "missileShip x4",
+          "swarmer x10"
+        ]
+      },
+      {
+        "n": 7,
+        "spawn": [
+          "exploder x4",
+          "fighter x8"
+        ]
+      },
+      {
+        "n": 8,
+        "spawn": [
+          "ringShip x2",
+          "fighter x10"
+        ]
+      },
+      {
+        "n": 9,
+        "spawn": [
+          "exploder x6",
+          "missileShip x4"
+        ]
+      },
+      {
+        "n": 10,
+        "spawn": [
+          "mothership x1",
+          "fighter x8"
+        ]
+      }
+    ],
+    "endless": {
+      "after": 10,
+      "hpScale": 1.12,
+      "countScale": 1.08,
+      "note": "Multiplied per wave beyond the scripted list."
+    }
+  },
+  "modes": {
+    "mining": {
+      "goal": "Bank a target amount of minerals before the timer expires.",
+      "target": 6000,
+      "time": 600
+    },
+    "survival": {
+      "goal": "Last as long as possible against endless escalating waves."
+    },
+    "missions": {
+      "goal": "Scripted maps with fixed objectives and starting layouts."
+    }
+  }
+}
