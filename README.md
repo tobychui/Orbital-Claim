@@ -1,3 +1,5 @@
+![theme_banner](img/theme.png)
+
 # Orbital Claim
 
 A space mining and tower defense mini game
