@@ -340,6 +340,24 @@ export class Renderer {
         ctx.restore();
       }
 
+      // Tier rings. One per level on paths whose silhouette does not otherwise
+      // change, so a Focused Beam or a Deep Bore is readable at a glance
+      // without hunting through the inspect panel.
+      if (s.rings > 0 && s.isBuilt) {
+        const mint = s.key === 'repair' || s.key === 'miner';
+        const rgb = mint ? '126,240,192' : '79,209,224';
+        const breathe = 0.72 + 0.28 * Math.sin(world.time * 2 + s.id);
+        ctx.save();
+        for (let i = 0; i < s.rings; i++) {
+          ctx.strokeStyle = `rgba(${rgb},${(0.5 - i * 0.12) * breathe})`;
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.arc(s.pos.x, s.pos.y, s.radius + 5 + i * 4.5, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
       // Upgrade in progress. Mint rather than cyan so it is not mistaken for
       // initial construction — the structure is live and working throughout.
       if (s.upgrading) {

@@ -40,6 +40,17 @@ export class Turret extends Structure {
     this.charge = 0;
   }
 
+  /** Weapon stats live on this class, so extend the base upgrade handler. */
+  applyUpgradeStats(u) {
+    super.applyUpgradeStats(u);
+    if (u.range !== undefined) this.range = u.range;
+    if (u.minRange !== undefined) this.minRange = u.minRange;
+    if (u.damage !== undefined) this.attackDamage = u.damage;
+    if (u.fireRate !== undefined) this.fireRate = u.fireRate;
+    if (u.splash !== undefined) this.splash = u.splash;
+    if (u.ammoCost !== undefined) this.ammoCost = u.ammoCost;
+  }
+
   /** Nearest valid enemy. Cheap, predictable, and easy for players to read. */
   acquire(world) {
     const enemies = world.enemiesInRange(this.pos.x, this.pos.y, this.range);

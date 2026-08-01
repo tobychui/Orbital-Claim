@@ -31,6 +31,12 @@ export class Miner extends Structure {
     this._scanTimer = 0;
   }
 
+  applyUpgradeStats(u) {
+    super.applyUpgradeStats(u);
+    if (u.mineRate !== undefined) this.mineRate = u.mineRate;
+    if (u.range !== undefined) this.range = u.range;
+  }
+
   /** Keep the beam list in step with the current target list. */
   _syncBeams() {
     const kept = new Map(this.beams.map((b) => [b.a, b]));

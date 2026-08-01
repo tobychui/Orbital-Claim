@@ -33,6 +33,30 @@ export class RepairStation extends Structure {
     return this.bots.filter((b) => !b.docked).length;
   }
 
+  /**
+   * Fleet and Nanites both change numbers the live drones read, so push the new
+   * values onto every drone already in the air rather than waiting for them to
+   * be rebuilt.
+   */
+  applyUpgradeStats(u) {
+    super.applyUpgradeStats(u);
+    if (u.range !== undefined) this.range = u.range;
+    if (u.healRate !== undefined) this.healRate = u.healRate;
+    if (u.botCount !== undefined) this.botCount = u.botCount;
+    if (u.botRebuildTime !== undefined) this.botRebuildTime = u.botRebuildTime;
+
+    for (const b of this.bots) {
+      if (u.botHp !== undefined) {
+        // Keep proportional damage rather than free-healing the fleet.
+        const frac = b.hp / b.maxHp;
+        b.maxHp = u.botHp;
+        b.hp = Math.max(1, u.botHp * frac);
+      }
+      if (u.botSpeed !== undefined) b.speed = u.botSpeed;
+      if (u.botRechargeRate !== undefined) b.rechargeRate = u.botRechargeRate;
+    }
+  }
+
   /** Called by RepairBot.destroy(). */
   onBotLost(bot) {
     this.bots = this.bots.filter((b) => b !== bot);
@@ -73,10 +97,13 @@ export class RepairStation extends Structure {
   update(dt, world) {
     super.update(dt, world);
 
-    // Launch the initial complement once the station finishes building.
-    if (this.isBuilt && !this._spawned) {
-      this._spawned = true;
-      for (let i = 0; i < this.botCount; i++) this._spawnBot(world);
+    // Top the fleet up to strength. Doubles as the initial launch and as the
+    // way a Fleet upgrade's extra drones appear, without a separate code path.
+    // Drones queued for rebuild count toward strength so losses are not
+    // double-replaced.
+    if (this.isBuilt) {
+      const pending = this.bots.length + this.rebuildQueue.length;
+      for (let i = pending; i < this.botCount; i++) this._spawnBot(world);
     }
 
     if (!this.powered) {

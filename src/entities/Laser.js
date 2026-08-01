@@ -23,6 +23,12 @@ export class Laser extends Turret {
     this.beamHeat = 0;
   }
 
+  applyUpgradeStats(u) {
+    super.applyUpgradeStats(u);
+    // Beams are rated in damage per second rather than per shot.
+    if (u.dps !== undefined) this.dps = u.dps;
+  }
+
   engage(dt, world, aimed) {
     // Only cut once the emitter has swung onto the target.
     if (!this.target || !aimed) {

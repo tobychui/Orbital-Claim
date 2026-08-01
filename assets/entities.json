@@ -30,7 +30,19 @@
       "range": 130,
       "mineRate": 4.0,
       "desc": "Extracts ore from every asteroid in range. Rate splits across asteroids; asteroids deplete.",
-      "maxLinks": 1
+      "maxLinks": 1,
+      "upgrades": [
+        {
+          "name": "Deep Bore",
+          "cost": 85,
+          "time": 3.5,
+          "mineRate": 6.0,
+          "power": -10,
+          "hp": 360,
+          "rings": 1,
+          "desc": "1.5x extraction. Costs more per unit of yield than a second miner - use it when there is no room left."
+        }
+      ]
     },
     "solar": {
       "name": "Solar Station",
@@ -87,7 +99,63 @@
       "dps": 14,
       "refundRatio": 1.0,
       "desc": "Continuous cutting beam. Never misses, but wears targets down slowly. Full refund on sell.",
-      "maxLinks": 1
+      "maxLinks": 1,
+      "upgradePaths": {
+        "focus": {
+          "name": "Focus",
+          "desc": "Tighter beam. Hits far harder, same reach.",
+          "tiers": [
+            {
+              "name": "Focused Beam II",
+              "cost": 120,
+              "time": 3.5,
+              "dps": 23,
+              "power": -14,
+              "hp": 300,
+              "desc": "Heavier cutting power.",
+              "rings": 1
+            },
+            {
+              "name": "Focused Beam III",
+              "cost": 210,
+              "time": 5.5,
+              "dps": 34,
+              "power": -21,
+              "hp": 340,
+              "desc": "Melts armour up close. Hungry.",
+              "rings": 2
+            }
+          ]
+        },
+        "optics": {
+          "name": "Optics",
+          "desc": "Longer reach. Outranges missile ships.",
+          "tiers": [
+            {
+              "name": "Long Optics II",
+              "cost": 110,
+              "time": 3.5,
+              "range": 220,
+              "dps": 16,
+              "power": -13,
+              "hp": 290,
+              "desc": "Reaches past the front line.",
+              "sprite": "laser-long"
+            },
+            {
+              "name": "Long Optics III",
+              "cost": 195,
+              "time": 5.5,
+              "range": 275,
+              "dps": 19,
+              "power": -19,
+              "hp": 320,
+              "desc": "Sniper coverage over a wide arc.",
+              "sprite": "laser-long2"
+            }
+          ]
+        }
+      }
     },
     "pulser": {
       "name": "Pulser",
@@ -120,7 +188,69 @@
       "minRange": 60,
       "ammoCost": 9,
       "desc": "Long range splash, but every missile costs minerals. Goes quiet if you run dry.",
-      "maxLinks": 1
+      "maxLinks": 1,
+      "upgradePaths": {
+        "warhead": {
+          "name": "Warhead",
+          "desc": "Bigger blast per shot, pricier ordnance.",
+          "tiers": [
+            {
+              "name": "Heavy Warhead II",
+              "cost": 270,
+              "time": 4.5,
+              "damage": 64,
+              "splash": 92,
+              "ammoCost": 14,
+              "power": -18,
+              "hp": 390,
+              "desc": "Wider, heavier detonation.",
+              "sprite": "missile-heavy"
+            },
+            {
+              "name": "Heavy Warhead III",
+              "cost": 430,
+              "time": 6.5,
+              "damage": 95,
+              "splash": 118,
+              "ammoCost": 20,
+              "power": -27,
+              "hp": 440,
+              "desc": "Clears a whole cluster per missile.",
+              "sprite": "missile-heavy2"
+            }
+          ]
+        },
+        "salvo": {
+          "name": "Salvo",
+          "desc": "Fires faster and further, same warhead.",
+          "tiers": [
+            {
+              "name": "Rapid Salvo II",
+              "cost": 250,
+              "time": 4.5,
+              "fireRate": 0.8,
+              "range": 335,
+              "ammoCost": 10,
+              "power": -18,
+              "hp": 370,
+              "desc": "More missiles in the air.",
+              "sprite": "missile-salvo3"
+            },
+            {
+              "name": "Rapid Salvo III",
+              "cost": 400,
+              "time": 6.5,
+              "fireRate": 1.2,
+              "range": 380,
+              "ammoCost": 11,
+              "power": -27,
+              "hp": 410,
+              "desc": "Sustained bombardment at long reach.",
+              "sprite": "missile-salvo4"
+            }
+          ]
+        }
+      }
     },
     "battery": {
       "name": "Battery Bank",
@@ -165,7 +295,69 @@
       "botRebuildTime": 6,
       "botRechargeRate": 14,
       "botRecallAt": 0.2,
-      "desc": "Launches four repair drones to patch damaged structures. Drones can be shot down and are rebuilt with power."
+      "desc": "Launches four repair drones to patch damaged structures. Drones can be shot down and are rebuilt with power.",
+      "upgradePaths": {
+        "fleet": {
+          "name": "Fleet",
+          "desc": "More, tougher drones. Mends many things at once.",
+          "tiers": [
+            {
+              "name": "Expanded Fleet II",
+              "cost": 230,
+              "time": 4.0,
+              "botCount": 6,
+              "botHp": 58,
+              "power": -16,
+              "hp": 320,
+              "desc": "Six drones, sturdier hulls. Mends six things at once.",
+              "healRate": 21
+            },
+            {
+              "name": "Expanded Fleet III",
+              "cost": 390,
+              "time": 6.0,
+              "botCount": 8,
+              "botHp": 78,
+              "botRebuildTime": 4.5,
+              "power": -25,
+              "hp": 370,
+              "desc": "Eight drones, rebuilt quickly when shot down.",
+              "healRate": 28
+            }
+          ]
+        },
+        "nanites": {
+          "name": "Nanites",
+          "desc": "Same four drones, far more repair each.",
+          "tiers": [
+            {
+              "name": "Nanite Swarm II",
+              "cost": 210,
+              "time": 4.0,
+              "healRate": 27,
+              "botSpeed": 132,
+              "range": 300,
+              "power": -16,
+              "hp": 310,
+              "desc": "Faster drones, heavier repair.",
+              "rings": 1
+            },
+            {
+              "name": "Nanite Swarm III",
+              "cost": 360,
+              "time": 6.0,
+              "healRate": 42,
+              "botSpeed": 158,
+              "range": 345,
+              "botRechargeRate": 22,
+              "power": -25,
+              "hp": 350,
+              "desc": "Rebuilds a damaged turret in seconds.",
+              "rings": 2
+            }
+          ]
+        }
+      }
     }
   },
   "enemies": {

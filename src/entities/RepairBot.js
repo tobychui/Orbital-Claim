@@ -21,7 +21,6 @@ export class RepairBot extends Entity {
     this.maxHp = def.botHp ?? 40;
     this.hp = this.maxHp;
     this.speed = def.botSpeed ?? 105;
-    this.healRate = (def.healRate ?? 16) / (def.botCount ?? 4);
 
     this.state = 'docked'; // docked | outbound | working | returning
     this.target = null;
@@ -52,6 +51,18 @@ export class RepairBot extends Entity {
 
   get docked() {
     return this.state === 'docked';
+  }
+
+  /**
+   * Repair per second for this drone.
+   *
+   * Read live off the station rather than cached at construction, so an upgrade
+   * takes effect on drones already in the air. The station's total output is
+   * split across the fleet: Fleet upgrades spread the same throughput over more
+   * targets, Nanites raises the throughput itself.
+   */
+  get healRate() {
+    return this.station.healRate / Math.max(1, this.station.botCount);
   }
 
   _moveTo(pt, dt) {

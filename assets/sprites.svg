@@ -57,8 +57,6 @@
   <g id="cell">
     <rect x="-6" y="-15" width="12" height="30" rx="3" fill="url(#hull)"
           stroke="#ffc65c" stroke-width="1.6"/>
-    <rect x="-3" y="-18" width="6" height="4" rx="1.5" fill="#24374b"
-          stroke="#ffc65c" stroke-width="1.1"/>
     <rect x="-3.5" y="-11" width="7" height="6" rx="1.2" fill="#ffc65c" fill-opacity="0.9"/>
     <rect x="-3.5" y="-3" width="7" height="6" rx="1.2" fill="#ffc65c" fill-opacity="0.6"/>
     <rect x="-3.5" y="5" width="7" height="6" rx="1.2" fill="#ffc65c" fill-opacity="0.3"/>
@@ -198,6 +196,72 @@
   <rect x="30.5" y="4" width="3" height="8" rx="1.5" fill="#4fd1e0"/>
   <circle cx="32" cy="32" r="5" fill="#0e1721" stroke="#4fd1e0" stroke-width="1.2"/>
   <circle cx="32" cy="32" r="2" fill="#4fd1e0"/>
+</symbol>
+
+<!-- Laser, Optics path: the emitter barrel grows visibly longer each tier. -->
+<symbol id="laser-long" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="22" fill="url(#glowCyan)" opacity="0.15"/>
+  <circle cx="32" cy="32" r="13" fill="url(#hull)" stroke="#4fd1e0" stroke-width="1.8"/>
+  <rect x="29" y="2" width="6" height="29" rx="2" fill="#24374b" stroke="#4fd1e0" stroke-width="1.4"/>
+  <rect x="27.5" y="14" width="9" height="3.5" rx="1.5" fill="#24374b" stroke="#4fd1e0" stroke-width="1"/>
+  <rect x="30.5" y="0" width="3" height="9" rx="1.5" fill="#4fd1e0"/>
+  <circle cx="32" cy="32" r="5" fill="#0e1721" stroke="#4fd1e0" stroke-width="1.2"/>
+  <circle cx="32" cy="32" r="2" fill="#4fd1e0"/>
+</symbol>
+
+<symbol id="laser-long2" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="23" fill="url(#glowCyan)" opacity="0.18"/>
+  <circle cx="32" cy="32" r="12" fill="url(#hull)" stroke="#9ad9ff" stroke-width="1.8"/>
+  <rect x="29.2" y="0" width="5.6" height="32" rx="2" fill="#24374b" stroke="#9ad9ff" stroke-width="1.4"/>
+  <rect x="27" y="9" width="10" height="3.5" rx="1.5" fill="#24374b" stroke="#9ad9ff" stroke-width="1"/>
+  <rect x="27" y="19" width="10" height="3.5" rx="1.5" fill="#24374b" stroke="#9ad9ff" stroke-width="1"/>
+  <rect x="30.6" y="0" width="2.8" height="7" rx="1.4" fill="#d6f7ff"/>
+  <circle cx="32" cy="32" r="5" fill="#0e1721" stroke="#9ad9ff" stroke-width="1.2"/>
+  <circle cx="32" cy="32" r="2" fill="#9ad9ff"/>
+</symbol>
+
+<!-- Missile bay, Warhead path: fewer but far heavier tubes. -->
+<symbol id="missile-heavy" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="23" fill="url(#glowCyan)" opacity="0.14"/>
+  <path d="M17 20 h30 v24 h-30 Z" fill="url(#hull)" stroke="#ffc65c" stroke-width="1.8"/>
+  <rect x="19" y="6" width="10" height="21" rx="2.5" fill="#24374b" stroke="#ffc65c" stroke-width="1.4"/>
+  <rect x="35" y="6" width="10" height="21" rx="2.5" fill="#24374b" stroke="#ffc65c" stroke-width="1.4"/>
+  <path d="M24 6 l0 -4 M40 6 l0 -4" stroke="#ffc65c" stroke-width="2.6"/>
+  <circle cx="32" cy="38" r="4.4" fill="#ffc65c" fill-opacity="0.85"/>
+</symbol>
+
+<symbol id="missile-heavy2" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="25" fill="url(#glowRed)" opacity="0.16"/>
+  <path d="M15 20 h34 v25 h-34 Z" fill="url(#hull)" stroke="#ffc65c" stroke-width="2"/>
+  <rect x="17" y="1" width="12" height="26" rx="3" fill="#24374b" stroke="#ffc65c" stroke-width="1.6"/>
+  <rect x="35" y="1" width="12" height="26" rx="3" fill="#24374b" stroke="#ffc65c" stroke-width="1.6"/>
+  <path d="M23 1 l0 -1 M41 1 l0 -1" stroke="#ffc65c" stroke-width="3.2"/>
+  <rect x="19" y="9" width="8" height="3" rx="1.5" fill="#ffc65c" fill-opacity="0.7"/>
+  <rect x="37" y="9" width="8" height="3" rx="1.5" fill="#ffc65c" fill-opacity="0.7"/>
+  <circle cx="32" cy="38" r="5" fill="#ffc65c" fill-opacity="0.9"/>
+</symbol>
+
+<!-- Missile bay, Salvo path: a third then a fourth tube. -->
+<symbol id="missile-salvo3" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="23" fill="url(#glowCyan)" opacity="0.14"/>
+  <path d="M15 20 h34 v24 h-34 Z" fill="url(#hull)" stroke="#ffc65c" stroke-width="1.8"/>
+  <rect x="17" y="12" width="7" height="15" rx="2" fill="#24374b" stroke="#ffc65c" stroke-width="1.2"/>
+  <rect x="28.5" y="12" width="7" height="15" rx="2" fill="#24374b" stroke="#ffc65c" stroke-width="1.2"/>
+  <rect x="40" y="12" width="7" height="15" rx="2" fill="#24374b" stroke="#ffc65c" stroke-width="1.2"/>
+  <path d="M20.5 12 l0 -4 M32 12 l0 -4 M43.5 12 l0 -4" stroke="#ffc65c" stroke-width="2"/>
+  <circle cx="32" cy="38" r="4" fill="#ffc65c" fill-opacity="0.85"/>
+</symbol>
+
+<symbol id="missile-salvo4" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="25" fill="url(#glowCyan)" opacity="0.18"/>
+  <path d="M11 20 h42 v25 h-42 Z" fill="url(#hull)" stroke="#ffc65c" stroke-width="2"/>
+  <rect x="13" y="10" width="7" height="17" rx="2" fill="#24374b" stroke="#ffc65c" stroke-width="1.2"/>
+  <rect x="23.5" y="10" width="7" height="17" rx="2" fill="#24374b" stroke="#ffc65c" stroke-width="1.2"/>
+  <rect x="34" y="10" width="7" height="17" rx="2" fill="#24374b" stroke="#ffc65c" stroke-width="1.2"/>
+  <rect x="44.5" y="10" width="7" height="17" rx="2" fill="#24374b" stroke="#ffc65c" stroke-width="1.2"/>
+  <path d="M16.5 10 l0 -4 M27 10 l0 -4 M37.5 10 l0 -4 M48 10 l0 -4"
+        stroke="#ffc65c" stroke-width="2"/>
+  <circle cx="32" cy="38" r="4.4" fill="#ffc65c" fill-opacity="0.9"/>
 </symbol>
 
 <!-- Pulser: faster, longer ranged. -->

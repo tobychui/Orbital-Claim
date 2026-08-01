@@ -275,8 +275,11 @@ export class Hud {
       rows.push({ label: 'Charging', get: () => `${s.bots.filter((b) => b.charging).length}` });
       rows.push({ label: 'Rebuilding', get: () => `${s.rebuildQueue.length}` });
     }
-    if (s.upgrades?.length) {
+    if (s.upgrades?.length || s.upgradePaths) {
       rows.push({ label: 'Level', get: () => `${s.level} / ${s.maxLevel}` });
+    }
+    if (s.upgradePaths) {
+      rows.push({ label: 'Path', get: () => s.pathName || 'open' });
     }
     rows.push({ label: 'Links', get: () => `${s.links.size} / ${s.maxLinks}` });
     rows.push({ label: 'Grid', get: () => s.gridId != null ? `#${s.gridId + 1}` : '—' });
@@ -312,8 +315,8 @@ export class Hud {
       <div class="ins-rows">
         ${this._specs.map((r) => `<div><span>${r.label}</span><b></b></div>`).join('')}
       </div>
-      ${!isAsteroid && s.upgrades?.length
-        ? '<button class="upg" data-act="upgrade"></button>' : ''}
+      ${!isAsteroid && (s.upgrades?.length || s.upgradePaths)
+        ? '<div class="upg-list"></div>' : ''}
       ${!isAsteroid && s.isLauncher ? `
         <div class="ins-btns">
           <button class="tgl" data-act="one"></button>
@@ -327,13 +330,13 @@ export class Hud {
     this._sellBtn = this.elInspect.querySelector('[data-act="sell"]');
     this._oneBtn = this.elInspect.querySelector('[data-act="one"]');
     this._allBtn = this.elInspect.querySelector('[data-act="all"]');
-    this._upgBtn = this.elInspect.querySelector('[data-act="upgrade"]');
+    this._upgList = this.elInspect.querySelector('.upg-list');
+    this._upgSig = null;
 
     // Attached once, so the elements survive long enough to receive a click.
     this._sellBtn?.addEventListener('click', () => this.onSell?.(s));
     this._oneBtn?.addEventListener('click', () => this.onToggleDisabled?.(s));
     this._allBtn?.addEventListener('click', () => this.onToggleAllLaunchers?.());
-    this._upgBtn?.addEventListener('click', () => this.onUpgrade?.(s));
   }
 
   _refreshInspect(s, game) {
@@ -352,26 +355,57 @@ export class Hud {
       this._allBtn.textContent = all ? 'Enable all' : 'Disable all';
       this._allBtn.classList.toggle('on', !!all);
     }
-    if (this._upgBtn) {
-      const u = s.nextUpgrade;
-      const eco = this.world.economy;
+    if (this._upgList) this._refreshUpgrades(s);
+  }
+
+  /**
+   * Upgrade buttons.
+   *
+   * The set of options changes shape as a structure commits to a branch (two
+   * choices, then one), so the markup is rebuilt only when that shape actually
+   * changes — rebuilding every frame would destroy the buttons between mousedown
+   * and mouseup and swallow the click.
+   */
+  _refreshUpgrades(s) {
+    const eco = this.world.economy;
+    const opts = s.upgrading ? [] : s.upgradeOptions;
+    const sig = [s.upgrading, s.level, s.upgradePath, opts.map((o) => o.pathKey).join(',')].join('|');
+
+    if (sig !== this._upgSig) {
+      this._upgSig = sig;
       if (s.upgrading) {
-        // Clickable while running: a solar is offline mid-upgrade, so cancelling
-        // has to stay available or a single-generator island can stall for good.
-        this._upgBtn.innerHTML =
-          `<span>Cancel upgrade</span><b>${Math.round(s.upgradeProgress * 100)}%</b>`;
-        this._upgBtn.disabled = false;
-        this._upgBtn.title = 'Stops the work and refunds the unspent minerals';
-      } else if (!u) {
-        this._upgBtn.innerHTML = '<span>Fully upgraded</span>';
-        this._upgBtn.disabled = true;
+        // Stays clickable: a solar generates nothing mid-upgrade, so cancelling
+        // must remain available or a single-generator island can stall for good.
+        this._upgList.innerHTML =
+          '<button class="upg busy" data-i="cancel"><span>Cancel upgrade</span><b></b></button>';
+      } else if (!opts.length) {
+        this._upgList.innerHTML = '<button class="upg" disabled><span>Fully upgraded</span></button>';
       } else {
-        this._upgBtn.innerHTML = `<span>${u.name}</span><b>${u.cost}</b>`;
-        this._upgBtn.title = u.desc || '';
-        this._upgBtn.disabled = !eco.canAfford(u.cost ?? 0);
+        this._upgList.innerHTML = opts.map((o, i) => `
+          <button class="upg" data-i="${i}" title="${o.tier.desc || ''}">
+            <span>${o.pathName ? `<em>${o.pathName}</em> ` : ''}${o.tier.name}</span>
+            <b>${o.tier.cost}</b>
+          </button>`).join('');
       }
-      this._upgBtn.classList.toggle('busy', !!s.upgrading);
+      // Rebound once per shape change, so the elements outlive a click.
+      for (const btn of this._upgList.querySelectorAll('button[data-i]')) {
+        const key = btn.dataset.i;
+        btn.addEventListener('click', () => {
+          if (key === 'cancel') this.onUpgrade?.(s, null);
+          else this.onUpgrade?.(s, opts[+key]?.pathKey ?? null);
+        });
+      }
     }
+
+    if (s.upgrading) {
+      const b = this._upgList.querySelector('b');
+      if (b) b.textContent = `${Math.round(s.upgradeProgress * 100)}%`;
+      return;
+    }
+    // Affordability can change every frame; that is just an attribute flip.
+    this._upgList.querySelectorAll('button[data-i]').forEach((btn, i) => {
+      btn.disabled = !eco.canAfford(opts[i]?.tier.cost ?? 0);
+    });
   }
 
   _renderInspect(s, game) {

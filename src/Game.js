@@ -133,7 +133,7 @@ export class Game {
     this.hud.onSetSpeed = (m) => this.setSpeed(m);
     this.hud.onToggleDisabled = (s) => this.toggleDisabled(s);
     this.hud.onToggleAllLaunchers = () => this.toggleAllLaunchers();
-    this.hud.onUpgrade = (s) => this.upgrade(s);
+    this.hud.onUpgrade = (s, pathKey) => this.upgrade(s, pathKey);
 
     // Rebuilt per run: the Hud recreates its DOM, so the old canvas is gone.
     this.minimap = new Minimap(
@@ -219,21 +219,28 @@ export class Game {
     }
   }
 
-  upgrade(s) {
+  /**
+   * @param {object} s
+   * @param {string|null} [pathKey] which branch, when the structure offers a
+   *   choice. Ignored while an upgrade is running — then this cancels instead.
+   */
+  upgrade(s, pathKey = null) {
     if (!s) return;
-    // The same button cancels while work is in progress.
     if (s.upgrading) {
       s.cancelUpgrade(this.world.economy);
       this.flashText('Upgrade cancelled');
       return;
     }
     if (!s.canUpgrade) return;
-    const u = s.nextUpgrade;
-    if (!s.startUpgrade(this.world.economy)) {
+    const opt = pathKey
+      ? s.upgradeOptions.find((o) => o.pathKey === pathKey)
+      : s.upgradeOptions[0];
+    if (!opt) return;
+    if (!s.startUpgrade(this.world.economy, pathKey)) {
       this.flashText('Not enough minerals');
       return;
     }
-    this.flashText(`${u.name} started`);
+    this.flashText(`${opt.tier.name} started`);
   }
 
   toggleDisabled(s) {

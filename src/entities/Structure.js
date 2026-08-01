@@ -61,25 +61,72 @@ export class Structure extends Entity {
     // the grid, but stops it working or drawing.
     this.disabled = false;
 
-    // Upgrade tiers, if this building has any.
+    // Two shapes of upgrade track.
+    //  `upgrades`     — a single linear ladder (solar, battery).
+    //  `upgradePaths` — mutually exclusive branches, each with its own tiers.
+    // Branching is a real commitment: the first upgrade picks a path and the
+    // structure is locked to it, so a laser is either a brawler or a sniper and
+    // never quietly becomes both.
     this.level = 1;
     this.upgrades = def.upgrades ?? [];
+    this.upgradePaths = def.upgradePaths ?? null;
+    this.upgradePath = null;
     this.upgrading = false;
     this.upgradeProgress = 0;
     // Total minerals sunk in, so a refund reflects upgrades too.
     this.invested = def.cost ?? 0;
+
+    // Concentric rings drawn around the structure to show tier. Used where an
+    // upgrade has no natural silhouette change — a faster beam or a faster
+    // drill looks identical otherwise. Paths that *do* change shape (longer
+    // barrels, extra tubes) swap the sprite instead and leave this at zero.
+    this.rings = 0;
+  }
+
+  /**
+   * What can be bought right now.
+   * @returns {{pathKey:string|null, pathName:string, pathDesc:string, tier:object}[]}
+   */
+  get upgradeOptions() {
+    if (this.upgradePaths) {
+      if (!this.upgradePath) {
+        // Nothing chosen yet: every branch's first tier is on the table.
+        return Object.entries(this.upgradePaths)
+          .map(([pathKey, p]) => ({
+            pathKey, pathName: p.name, pathDesc: p.desc ?? '', tier: p.tiers?.[0],
+          }))
+          .filter((o) => o.tier);
+      }
+      const p = this.upgradePaths[this.upgradePath];
+      const tier = p?.tiers?.[this.level - 1];
+      return tier
+        ? [{ pathKey: this.upgradePath, pathName: p.name, pathDesc: p.desc ?? '', tier }]
+        : [];
+    }
+    const tier = this.upgrades[this.level - 1];
+    return tier ? [{ pathKey: null, pathName: '', pathDesc: '', tier }] : [];
   }
 
   get canUpgrade() {
-    return this.isBuilt && !this.upgrading && this.level <= this.upgrades.length;
+    return this.isBuilt && !this.upgrading && this.upgradeOptions.length > 0;
   }
 
+  /** First available tier. Kept for callers that do not care about branches. */
   get nextUpgrade() {
-    return this.upgrades[this.level - 1] ?? null;
+    return this.upgradeOptions[0]?.tier ?? null;
   }
 
   get maxLevel() {
+    if (this.upgradePaths) {
+      const lens = Object.values(this.upgradePaths).map((p) => p.tiers?.length ?? 0);
+      return 1 + Math.max(0, ...lens);
+    }
     return this.upgrades.length + 1;
+  }
+
+  /** Human-readable branch name, for the inspect panel. */
+  get pathName() {
+    return this.upgradePath ? this.upgradePaths?.[this.upgradePath]?.name ?? '' : '';
   }
 
   /**
@@ -87,14 +134,23 @@ export class Structure extends Entity {
    * taking a solar offline while it upgrades could cut the very power the
    * upgrade needs to finish, deadlocking a base with a single generator.
    */
-  startUpgrade(economy) {
-    const u = this.nextUpgrade;
-    if (!this.canUpgrade || !u) return false;
-    if (!economy.spend(u.cost ?? 0)) return false;
-    this.invested += u.cost ?? 0;
+  /**
+   * @param {object} economy
+   * @param {string|null} [pathKey] which branch to take; defaults to the only
+   *   option when there is just one.
+   */
+  startUpgrade(economy, pathKey = null) {
+    if (!this.canUpgrade) return false;
+    const opts = this.upgradeOptions;
+    const opt = pathKey ? opts.find((o) => o.pathKey === pathKey) : opts[0];
+    if (!opt) return false;
+    if (!economy.spend(opt.tier.cost ?? 0)) return false;
+
+    this.invested += opt.tier.cost ?? 0;
     this.upgrading = true;
     this.upgradeProgress = 0;
-    this._pendingUpgrade = u;
+    this._pendingUpgrade = opt.tier;
+    this._pendingPath = opt.pathKey;
     return true;
   }
 
@@ -115,6 +171,7 @@ export class Structure extends Entity {
       this.powerOutput = Math.max(0, u.power);
       this.powerDraw = Math.max(0, -u.power);
     }
+    if (u.rings !== undefined) this.rings = u.rings;
     if (u.name) this.name = u.name;
     if (u.desc) this.def = { ...this.def, desc: u.desc };
   }
@@ -136,6 +193,7 @@ export class Structure extends Entity {
     this.upgrading = false;
     this.upgradeProgress = 0;
     this._pendingUpgrade = null;
+    this._pendingPath = null;
     return true;
   }
 
@@ -150,10 +208,14 @@ export class Structure extends Entity {
     if (this.upgradeProgress < 1) return;
 
     this.applyUpgradeStats(u);
+    // Committing to a branch happens on completion, not on purchase, so a
+    // cancelled first upgrade leaves the choice open.
+    if (this._pendingPath) this.upgradePath = this._pendingPath;
     this.level++;
     this.upgrading = false;
     this.upgradeProgress = 0;
     this._pendingUpgrade = null;
+    this._pendingPath = null;
   }
 
   /** True for weapons that consume minerals per shot. */
