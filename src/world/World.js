@@ -77,8 +77,16 @@ export class World {
     this.economy = new Economy(data.resources?.minerals);
 
     this.time = 0;
+    // Sandbox: structures are finished the moment they are placed.
+    this.instantBuild = false;
     this.onStructureDestroyed = null;
     this.gameOver = false;
+
+    // Run statistics for the end-of-run report. Combat only: selling is not a
+    // loss and clearing enemies in the sandbox is not a kill.
+    this.kills = 0;
+    this.structuresBuilt = 0;
+    this.structuresLost = 0;
 
     this._placeStartingBase();
     this.waves = new WaveDirector(data, this);
@@ -125,7 +133,9 @@ export class World {
     }
 
     const s = new Cls(x, y, def);
-    if (free) {
+    // The free starting solar counts too, so built and destroyed always reconcile.
+    this.structuresBuilt++;
+    if (free || this.instantBuild) {
       s.buildProgress = 1;
     }
     this.structures.push(s);
@@ -372,6 +382,7 @@ export class World {
           // Selling routes through sellStructure, which removes the structure
           // before this scan runs — so only combat losses reach here and blow up.
           this.spawnExplosion(s.pos.x, s.pos.y, s.radius * 1.15);
+          this.structuresLost++;
           this.onStructureDestroyed?.(s);
         }
       }
@@ -384,6 +395,7 @@ export class World {
     // Pay bounties for anything that died this tick before clearing it out.
     for (const e of this.enemies) {
       if (!e.alive) {
+        this.kills++;
         this.economy.refund(e.bounty ?? 0);
         this.spawnBlast(e.pos.x, e.pos.y, e.radius * 2.2);
       }

@@ -94,6 +94,10 @@ export class Hud {
     this.elPowSub = this.root.querySelector('#res-pow .sub');
     this.elFps = this.root.querySelector('#stat-fps .sub');
     this.elWarn = this.root.querySelector('#warn');
+    // Delegated, because the warning markup is rebuilt whenever its text changes.
+    this.elWarn.addEventListener('click', (e) => {
+      if (e.target.closest('[data-act="locate-isolated"]')) this.onLocateIsolated?.();
+    });
     this.elInspect = this.root.querySelector('#inspect');
 
     this.elRecycle = this.root.querySelector('#recycle');
@@ -146,7 +150,7 @@ export class Hud {
       ? `Wave ${w.nextWaveNumber}`
       : `Wave ${w.waveIndex}`;
     this.elWaveT.textContent = building
-      ? `in ${Math.ceil(w.timer)}s`
+      ? w.frozen ? 'on hold' : `in ${Math.ceil(w.timer)}s`
       : `${this.world.enemies.length} hostile${this.world.enemies.length === 1 ? '' : 's'}`;
 
     // Composition is shown up front so preparing is informed, not guesswork.
@@ -168,6 +172,74 @@ export class Hud {
     }
   }
 
+  /**
+   * Debug panel for sandbox mode: an enemy spawner plus world switches.
+   * Built once; `_updateSandbox` only flips classes and labels per frame.
+   */
+  buildSandbox(h) {
+    const el = document.createElement('div');
+    el.className = 'sandbox';
+    const enemies = Object.entries(this.data.enemies ?? {});
+    el.innerHTML = `
+      <div class="sb-t" title="Collapse / expand">Sandbox <span>debug</span><i>–</i></div>
+      <div class="sb-l">Spawn enemy <em>click map · shift = keep</em></div>
+      <div class="sb-grid">
+        ${enemies.map(([key, def]) => `
+          <button class="sb-en" data-spawn="${key}" title="${def.name} — ${def.desc || ''}">
+            <svg viewBox="0 0 64 64"><use href="assets/sprites.svg#${def.sprite}"/></svg>
+            <span>${def.name}</span>
+          </button>`).join('')}
+      </div>
+      <div class="sb-cnt">
+        <span class="sb-l">Count</span>
+        ${[1, 5, 10, 25].map((n) => `<button class="spd" data-count="${n}">×${n}</button>`).join('')}
+      </div>
+      <div class="sb-l">World</div>
+      <div class="sb-acts">
+        <button class="tgl" data-act="call">Call next wave</button>
+        <button class="tgl" data-act="timer"></button>
+        <button class="tgl" data-act="power"></button>
+        <button class="tgl" data-act="clear">Clear enemies</button>
+        <button class="tgl" data-act="repair">Repair all</button>
+      </div>`;
+    this.root.appendChild(el);
+
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.sb-t')) {
+        const min = el.classList.toggle('min');
+        el.querySelector('.sb-t i').textContent = min ? '+' : '–';
+        return;
+      }
+      const b = e.target.closest('button');
+      if (!b) return;
+      if (b.dataset.spawn) h.onSpawnSelect?.(b.dataset.spawn);
+      else if (b.dataset.count) h.onSpawnCount?.(+b.dataset.count);
+      else ({
+        call: h.onCallWave, timer: h.onToggleWaveTimer, power: h.onTogglePower,
+        clear: h.onClearEnemies, repair: h.onRepairAll,
+      })[b.dataset.act]?.();
+    });
+
+    this._sb = {
+      spawn: [...el.querySelectorAll('[data-spawn]')],
+      count: [...el.querySelectorAll('[data-count]')],
+      timer: el.querySelector('[data-act="timer"]'),
+      power: el.querySelector('[data-act="power"]'),
+    };
+  }
+
+  _updateSandbox(game) {
+    const sb = this._sb;
+    for (const b of sb.spawn) b.classList.toggle('active', b.dataset.spawn === game.spawnKey);
+    for (const b of sb.count) b.classList.toggle('on', +b.dataset.count === game.spawnCount);
+    const held = this.world.waves.frozen;
+    sb.timer.textContent = held ? 'Wave timer: held' : 'Wave timer: running';
+    sb.timer.classList.toggle('on', held);
+    const inf = this.world.grid.unlimited;
+    sb.power.textContent = inf ? 'Power: unlimited' : 'Power: normal';
+    sb.power.classList.toggle('on', inf);
+  }
+
   setActiveBuild(key) {
     for (const [k, btn] of this._buildButtons) {
       btn.classList.toggle('active', k === key);
@@ -178,7 +250,7 @@ export class Hud {
     const w = this.world;
     const eco = w.economy;
 
-    this.elMin.textContent = `${Math.floor(eco.minerals)}`;
+    this.elMin.textContent = eco.infinite ? '∞' : `${Math.floor(eco.minerals)}`;
     this.elMinSub.textContent = `+${eco.incomePerSec.toFixed(1)}/s`;
 
     const g = w.grid;
@@ -186,7 +258,7 @@ export class Hud {
     // Batteries cover a deficit before the ratio drops, so show the buffer:
     // that is the difference between "fine" and "about to slow down".
     const bat = g.storedEnergy;
-    this.elPowSub.textContent = g.overdrawn
+    this.elPowSub.textContent = g.unlimited ? 'unlimited' : g.overdrawn
       ? `${Math.round(g.ratio * 100)}%`
       : bat.cap > 0
         ? `bat ${Math.round((bat.stored / bat.cap) * 100)}%`
@@ -198,6 +270,7 @@ export class Hud {
     for (const [m, b] of this._speedBtns) b.classList.toggle('on', game.speed === m);
     this._updateWave();
     this._updateObjective(game.mode);
+    if (this._sb) this._updateSandbox(game);
 
     // Affordability feedback on the build bar.
     for (const [k, btn] of this._buildButtons) {
@@ -222,14 +295,21 @@ export class Hud {
         : 'Power overdrawn — everything is running slow. Build a Solar Station.');
     }
     if (stranded > 0) {
-      warnings.push(stranded === 1
-        ? 'One structure is isolated — link it to your grid with a relay.'
-        : `${stranded} structures are isolated — link them to your grid with relays.`);
+      // Clickable: a stranded relay at the edge of a big base is otherwise a
+      // hunt across the whole map.
+      warnings.push({
+        act: 'locate-isolated',
+        text: stranded === 1
+          ? 'One structure is isolated — link it to your grid with a relay.'
+          : `${stranded} structures are isolated — link them to your grid with relays.`,
+      });
     }
-    const txt = warnings.join('|');
+    const txt = warnings.map((w) => w.text ?? w).join('|');
     if (txt !== this._warnText) {
       this._warnText = txt;
-      this.elWarn.innerHTML = warnings.map((t) => `<div class="w">${t}</div>`).join('');
+      this.elWarn.innerHTML = warnings.map((w) => w.act
+        ? `<div class="w link" data-act="${w.act}" title="Show me">${w.text} <u>Show</u></div>`
+        : `<div class="w">${w}</div>`).join('');
     }
 
     this._renderInspect(game.selected, game);
@@ -264,6 +344,14 @@ export class Hud {
       rows.push({ label: 'Rocks', get: () => `${s.targets?.length ?? 0}` });
     }
     if (s.ammoCost) rows.push({ label: 'Per shot', get: () => `${s.ammoCost} min` });
+    if (s.key === 'pulser') {
+      // Built once per selection, so these must read sensibly before and after
+      // the Aegis path switches the turret from shooting ships to missiles.
+      rows.push({ label: 'Rate', get: () => s.intercept
+        ? `1 per ${s.interval.toFixed(1)}s`
+        : `${s.fireRate.toFixed(1)}/s` });
+      rows.push({ label: 'Intercepts', get: () => s.intercept ? `${s.intercepts}` : '—' });
+    }
     if (s.key === 'battery') {
       rows.push({ label: 'Charge', get: () => `${Math.round(s.stored)} / ${s.capacity}` });
       rows.push({ label: 'Flow', get: () => s._discharging ? `-${s._discharging.toFixed(1)}`
@@ -290,6 +378,7 @@ export class Hud {
         : s.disabled ? 'disabled'
         : !s.connected ? 'no power'
         : s.starved ? 'no minerals'
+        : s.recharging ? 'recharging'
         : 'online',
     });
     return rows;

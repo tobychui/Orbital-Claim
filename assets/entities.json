@@ -169,8 +169,112 @@
       "damage": 7,
       "fireRate": 4.0,
       "projectile": "bolt",
-      "desc": "Higher sustained damage and reach. Power hungry.",
-      "maxLinks": 1
+      "desc": "Long-range bolt thrower. Out-reaches the laser, but bolts can miss fast movers. Power hungry.",
+      "maxLinks": 1,
+      "upgradePaths": {
+        "lance": {
+          "name": "Lance",
+          "desc": "Single rail. Slow, heavy slugs from extreme range.",
+          "tiers": [
+            {
+              "name": "Rail Lance II",
+              "cost": 190,
+              "time": 4.0,
+              "range": 275,
+              "damage": 24,
+              "fireRate": 1.6,
+              "projectile": "slug",
+              "projectileSpeed": 1000,
+              "barrels": 1,
+              "power": -20,
+              "hp": 330,
+              "desc": "Fast slugs that rarely miss. Outranges missile ships.",
+              "sprite": "pulser-lance"
+            },
+            {
+              "name": "Rail Lance III",
+              "cost": 330,
+              "time": 6.0,
+              "range": 340,
+              "damage": 46,
+              "fireRate": 1.25,
+              "projectileSpeed": 1250,
+              "power": -29,
+              "hp": 360,
+              "desc": "Cracks ring-ship shields long before they close.",
+              "sprite": "pulser-lance2"
+            }
+          ]
+        },
+        "barrage": {
+          "name": "Barrage",
+          "desc": "Extra barrels. A wall of bolts at long range.",
+          "tiers": [
+            {
+              "name": "Long Barrage II",
+              "cost": 170,
+              "time": 4.0,
+              "range": 240,
+              "damage": 7,
+              "fireRate": 6.0,
+              "barrels": 3,
+              "barrelGap": 7,
+              "power": -20,
+              "hp": 330,
+              "desc": "Third barrel. Thins packs before they reach the line.",
+              "sprite": "pulser-barrage3"
+            },
+            {
+              "name": "Long Barrage III",
+              "cost": 300,
+              "time": 6.0,
+              "range": 270,
+              "damage": 8,
+              "fireRate": 8.0,
+              "barrels": 4,
+              "barrelGap": 6,
+              "power": -28,
+              "hp": 370,
+              "desc": "Four barrels. Shreds swarms at range.",
+              "sprite": "pulser-barrage4"
+            }
+          ]
+        },
+        "aegis": {
+          "name": "Aegis",
+          "desc": "Special: becomes missile defence. Shoots down incoming missiles and never misses, but stops firing at ships and burns heavy power recharging after every intercept.",
+          "tiers": [
+            {
+              "name": "Aegis Interceptor II",
+              "cost": 220,
+              "time": 4.5,
+              "intercept": true,
+              "range": 240,
+              "fireRate": 0.6,
+              "projectile": "interceptor",
+              "projectileSpeed": 900,
+              "barrels": 2,
+              "barrelGap": 8,
+              "power": -38,
+              "idleFactor": 0.1,
+              "hp": 330,
+              "desc": "Intercepts one missile every 1.7s. Draws 38 power while recharging.",
+              "sprite": "pulser-aegis"
+            },
+            {
+              "name": "Aegis Interceptor III",
+              "cost": 380,
+              "time": 6.5,
+              "fireRate": 1.25,
+              "barrelGap": 9,
+              "power": -48,
+              "hp": 370,
+              "desc": "Intercepts one missile every 0.8s. Draws 48 power while recharging.",
+              "sprite": "pulser-aegis2"
+            }
+          ]
+        }
+      }
     },
     "missileBay": {
       "name": "Missile Battery",
@@ -395,7 +499,7 @@
       "fireRate": 0.6,
       "range": 200,
       "bounty": 20,
-      "desc": "Outranges basic lasers. Must be pushed with pulsers or missiles."
+      "desc": "Outranges basic lasers and fires homing missiles. Push it with pulsers or missiles, or shoot its missiles down with an Aegis."
     },
     "exploder": {
       "name": "Exploder",
@@ -433,13 +537,16 @@
       "damage": 30,
       "fireRate": 0.8,
       "range": 230,
+      "projectile": "missile",
+      "projectileSpeed": 190,
+      "missileSplash": 45,
       "bounty": 250,
       "spawns": {
         "type": "swarmer",
         "every": 4.0,
         "count": 2
       },
-      "desc": "Wave boss. Tanky, and it keeps launching swarmers while it closes."
+      "desc": "Wave boss. Tanky, shells your base with splash missiles, and keeps launching swarmers while it closes."
     }
   },
   "waves": {
@@ -535,6 +642,9 @@
     },
     "missions": {
       "goal": "Scripted maps with fixed objectives and starting layouts."
+    },
+    "sandbox": {
+      "goal": "Debug playground. Infinite minerals and power, instant build and upgrades, spawn any enemy on demand."
     }
   }
 }

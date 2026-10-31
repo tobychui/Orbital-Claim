@@ -206,7 +206,16 @@ export class Structure extends Entity {
     const rate = this.connected ? this.supplyRatio : 0;
     this.upgradeProgress += (dt * rate) / (u.time ?? 3);
     if (this.upgradeProgress < 1) return;
+    this.finishUpgrade();
+  }
 
+  /**
+   * Install the pending upgrade now. Normally reached when progress fills;
+   * the sandbox calls it straight after purchase for instant upgrades.
+   */
+  finishUpgrade() {
+    const u = this._pendingUpgrade;
+    if (!u) return;
     this.applyUpgradeStats(u);
     // Committing to a branch happens on completion, not on purchase, so a
     // cancelled first upgrade leaves the choice open.

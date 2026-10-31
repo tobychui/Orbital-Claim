@@ -99,6 +99,8 @@
   .mode .mn { display:block; font-size:15px; font-weight:600; color:#e6f2ff; }
   .mode .md { display:block; font-size:11.5px; color:var(--dim); margin:5px 0 9px; line-height:1.5; }
   .mode .mb { display:block; font-size:11px; color:var(--mint); }
+  .mode.debug { border-style:dashed; border-color:#6b4d16; }
+  .mode.debug .mb { color:var(--amber); }
   .howto {
     display:inline-flex; align-items:center; gap:8px; margin-top:26px;
     font-size:13px; color:var(--dim); text-decoration:none;
@@ -111,8 +113,12 @@
   /* -------------------------------------------------------------- over --- */
   #over {
     position:absolute; inset:0; z-index:15; display:none;
-    align-items:center; justify-content:center; flex-direction:column;
-    background:#04060bd0; text-align:center;
+    flex-direction:column; overflow-y:auto;
+    background:#04060be8; text-align:center; user-select:text;
+  }
+  .over-card {
+    margin:auto; width:min(960px, 100%); padding:28px 16px;
+    display:flex; flex-direction:column; align-items:center;
   }
   #over.show { display:flex; }
   #over h1 { margin:0 0 6px; font-size:26px; letter-spacing:.18em;
@@ -129,6 +135,40 @@
   #over-rows span { color:var(--dim); font-size:12.5px; }
   #over-rows b { color:#e6f2ff; font-size:12.5px; text-align:right; }
   .over-btns { display:flex; gap:10px; margin-top:16px; }
+
+  /* Run report charts. */
+  #over-charts { width:100%; margin-top:10px; text-align:left; }
+  .rc-empty { text-align:center; }
+  .rc-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px; }
+  @media (max-width:720px) { .rc-grid { grid-template-columns:1fr; } }
+  .rc-card {
+    margin:0; background:var(--panel); border:1px solid var(--line);
+    border-radius:9px; padding:10px 12px 8px;
+  }
+  .rc-h { display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  #over .rc-h b { color:#e6f2ff; font-size:12.5px; font-weight:600; }
+  .rc-at { color:var(--dim); font-size:10.5px; font-variant-numeric:tabular-nums; }
+  .rc-ins { color:var(--dim); font-size:11px; margin-top:2px; line-height:1.4; }
+  .rc-leg { display:flex; flex-wrap:wrap; gap:4px 14px; margin-top:6px; font-size:11px; color:var(--dim); }
+  .rc-leg span { display:flex; align-items:center; gap:5px; }
+  .rc-leg i { width:12px; height:3px; border-radius:2px; display:inline-block; }
+  #over .rc-leg b { color:#e6f2ff; font-weight:600; font-variant-numeric:tabular-nums; }
+  .rc-card canvas { display:block; width:100%; height:150px; margin-top:6px; cursor:crosshair; }
+  .rc-table {
+    margin-top:10px; background:var(--panel); border:1px solid var(--line);
+    border-radius:9px; padding:8px 12px;
+  }
+  .rc-table summary { cursor:pointer; color:var(--text); font-size:12px; }
+  .rc-scroll { overflow-x:auto; margin-top:8px; }
+  .rc-table table { width:100%; border-collapse:collapse; font-size:11.5px; font-variant-numeric:tabular-nums; }
+  .rc-table th, .rc-table td {
+    padding:4px 8px; text-align:right; border-top:1px solid var(--line);
+    color:var(--text); white-space:nowrap; font-weight:400;
+  }
+  .rc-table thead th { color:var(--dim); font-weight:600; border-top:0; }
+  .rc-table tbody th { text-align:left; color:#e6f2ff; font-weight:600; }
+  .rc-table tr.short td:last-child { color:var(--amber); }
+  .rc-table tr.short td:last-child::after { content:" ▲ short"; font-size:10px; }
   #over button {
     font:inherit; font-size:13px; padding:9px 22px;
     background:#12202f; border:1px solid #31557d; color:#cfe6ff;
@@ -145,6 +185,10 @@
     padding:5px 13px; border-radius:6px; font-size:12px;
   }
   .hud-warn .w.err { background:#2a0f0ecc; border-color:#6b1f16; color:#ff8a7a; }
+  .hud-warn .w.link { pointer-events:auto; cursor:pointer; }
+  .hud-warn .w.link:hover { background:#3a2b10ee; border-color:#a07424; }
+  .hud-warn .w.link u { text-decoration:none; margin-left:6px; padding:1px 7px; border-radius:4px;
+                        background:#6b4d1688; color:#ffe2a8; font-weight:600; }
 
   /* ------------------------------------------------------------- build --- */
   .hud-bottom { position:absolute; left:0; right:0; bottom:0; display:flex;
@@ -245,6 +289,33 @@
   }
   .sell:hover { background:#241417; border-color:#7d3a3a; }
 
+  /* ----------------------------------------------------------- sandbox --- */
+  .sandbox {
+    position:absolute; left:12px; top:62px; width:226px;
+    background:#0b131eee; border:1px solid #6b4d16; border-radius:8px; padding:10px 11px 11px;
+  }
+  .sb-t { color:var(--amber); font-weight:600; font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; }
+  .sb-t { cursor:pointer; display:flex; align-items:baseline; gap:6px; }
+  .sb-t span { color:var(--dim); font-weight:400; letter-spacing:.06em; text-transform:none; }
+  .sb-t i { margin-left:auto; font-style:normal; color:var(--dim); font-size:14px; line-height:1; }
+  .sandbox.min { width:auto; padding:6px 11px; }
+  .sandbox.min > :not(.sb-t) { display:none; }
+  .sb-l { font-size:10.5px; color:var(--dim); letter-spacing:.06em; text-transform:uppercase; margin:9px 0 5px; }
+  .sb-l em { font-style:normal; text-transform:none; letter-spacing:0; color:#4a5a70; margin-left:4px; }
+  .sb-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:5px; }
+  .sb-en {
+    font:inherit; padding:5px 2px 4px; cursor:pointer; text-align:center;
+    background:var(--panel); border:1px solid var(--line); border-radius:6px; color:var(--dim);
+  }
+  .sb-en:hover { border-color:#6b2a24; color:var(--text); }
+  .sb-en.active { border-color:var(--red); background:#1d0f12; color:#ff9a8b; box-shadow:0 0 0 1px #ff5a4d44; }
+  .sb-en svg { width:24px; height:24px; display:block; margin:0 auto 1px; }
+  .sb-en span { display:block; font-size:9px; line-height:1.2; }
+  .sb-cnt { display:flex; align-items:center; gap:4px; margin-top:7px; }
+  .sb-cnt .sb-l { margin:0 4px 0 0; }
+  .sb-acts { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+  .sb-acts .tgl:first-child { grid-column:1 / -1; }
+
   /* -------------------------------------------------------------- boot --- */
   #boot {
     position:absolute; inset:0; display:none; align-items:center; justify-content:center;
@@ -297,13 +368,16 @@
 </div>
 
 <div id="over">
-  <h1 id="over-title">Run over</h1>
-  <p id="over-reason"></p>
-  <div id="over-rows"></div>
-  <p id="over-best"></p>
-  <div class="over-btns">
-    <button id="again">Play again</button>
-    <button id="tomenu" class="ghost">Change mode</button>
+  <div class="over-card">
+    <h1 id="over-title">Run over</h1>
+    <p id="over-reason"></p>
+    <div id="over-rows"></div>
+    <p id="over-best"></p>
+    <div id="over-charts"></div>
+    <div class="over-btns">
+      <button id="again">Play again</button>
+      <button id="tomenu" class="ghost">Change mode</button>
+    </div>
   </div>
 </div>
 

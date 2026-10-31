@@ -34,6 +34,9 @@ export class WaveDirector {
     this._spawnTimer = 0;
     this.onWaveStart = null;
     this.onWaveClear = null;
+    // Sandbox: the build-window countdown is held, so waves arrive only when
+    // called. An active wave still plays out normally.
+    this.frozen = false;
   }
 
   /** Composition of wave n (1-based), scaling past the scripted list. */
@@ -128,7 +131,7 @@ export class WaveDirector {
 
   update(dt) {
     if (this.state === 'building') {
-      this.timer -= dt;
+      if (!this.frozen) this.timer -= dt;
       if (this.timer <= 0) this.startWave();
       return;
     }

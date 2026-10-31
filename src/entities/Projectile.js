@@ -22,6 +22,9 @@ export class Projectile extends Entity {
     this.homing = opts.homing ?? false;
     this.speed = opts.speed ?? 620;
     this.target = opts.target ?? null;
+    // Interceptors hunt an enemy projectile rather than a ship.
+    this.prey = opts.prey ?? null;
+    this.doomed = false;
     this.life = 3.5;
 
     const aim = this.target ? this.target.pos : { x: opts.x, y: opts.y - 1 };
@@ -45,8 +48,18 @@ export class Projectile extends Entity {
       this.angle = Math.atan2(this.vel.y, this.vel.x);
     }
 
+    if (this.prey) {
+      this._updateInterceptor(dt, world);
+      return;
+    }
+
     this.pos.x += this.vel.x * dt;
     this.pos.y += this.vel.y * dt;
+
+    // An Aegis has locked this missile: it is already dead, it just has not
+    // been reached yet. Disarming it at lock time is what makes interception
+    // "always accurate" — it can never slip through and land its hit.
+    if (this.doomed) return;
 
     if (this.team === 'player') {
       // Hit whatever is in the way, not just the original target: a bolt that
@@ -68,5 +81,30 @@ export class Projectile extends Entity {
       world.spawnBlast(this.pos.x, this.pos.y, this.splash > 0 ? this.splash : 12);
       this.destroy();
     }
+  }
+
+  /**
+   * Perfect pursuit: re-aimed every tick, so it cannot miss. The prey was
+   * disarmed at launch, so all that is left is to reach it and pop it.
+   */
+  _updateInterceptor(dt, world) {
+    const prey = this.prey;
+    if (!prey.alive) {
+      this.destroy();
+      return;
+    }
+    const to = Vec2.sub(prey.pos, this.pos);
+    const d = Math.hypot(to.x, to.y);
+    const step = this.speed * dt;
+    if (d <= step + 6) {
+      prey.destroy();
+      world.spawnBlast(prey.pos.x, prey.pos.y, 14);
+      this.destroy();
+      return;
+    }
+    this.vel = Vec2.scale(Vec2.norm(to), this.speed);
+    this.angle = Math.atan2(to.y, to.x);
+    this.pos.x += this.vel.x * dt;
+    this.pos.y += this.vel.y * dt;
   }
 }

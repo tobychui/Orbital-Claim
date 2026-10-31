@@ -85,6 +85,7 @@ export class Renderer {
     this._drawProjectiles(ctx, world);
     this._drawEffects(ctx, world);
     if (ui) this._drawPlacement(ctx, world, ui);
+    if (ui?.spawnKey) this._drawSpawnGhost(ctx, world, ui);
     if (ui?.sellMode) this._drawSellHover(ctx, world, ui);
 
     ctx.restore();
@@ -348,11 +349,14 @@ export class Renderer {
         const rgb = mint ? '126,240,192' : '79,209,224';
         const breathe = 0.72 + 0.28 * Math.sin(world.time * 2 + s.id);
         ctx.save();
+        // Hugged tight to the hull, and deliberately inside the build (+7),
+        // upgrade (+9) and selection (+10) rings — further out they read as a
+        // progress arc rather than a tier badge.
         for (let i = 0; i < s.rings; i++) {
-          ctx.strokeStyle = `rgba(${rgb},${(0.5 - i * 0.12) * breathe})`;
-          ctx.lineWidth = 1.6;
+          ctx.strokeStyle = `rgba(${rgb},${(0.55 - i * 0.12) * breathe})`;
+          ctx.lineWidth = 1.5;
           ctx.beginPath();
-          ctx.arc(s.pos.x, s.pos.y, s.radius + 5 + i * 4.5, 0, Math.PI * 2);
+          ctx.arc(s.pos.x, s.pos.y, s.radius + 1.5 + i * 3, 0, Math.PI * 2);
           ctx.stroke();
         }
         ctx.restore();
@@ -390,6 +394,34 @@ export class Renderer {
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
         ctx.arc(s.pos.x, s.pos.y, s.radius + 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // "Show me" highlight from the isolated-structure warning: a few hard
+      // blinks plus a ring closing in on the target, so it stands out even in
+      // a dense base.
+      const locateLeft = (s.locateUntil ?? 0) - performance.now();
+      if (locateLeft > 0) {
+        const elapsed = 2200 - locateLeft;
+        const on = (elapsed % 440) < 260;
+        const sweep = (elapsed % 440) / 440;
+        ctx.save();
+        if (on) {
+          ctx.fillStyle = 'rgba(255,200,120,0.28)';
+          ctx.beginPath();
+          ctx.arc(s.pos.x, s.pos.y, s.radius + 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(255,226,168,0.95)';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(s.pos.x, s.pos.y, s.radius + 8, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        ctx.strokeStyle = `rgba(255,200,120,${0.7 * (1 - sweep)})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(s.pos.x, s.pos.y, s.radius + 8 + 40 * (1 - sweep), 0, Math.PI * 2);
         ctx.stroke();
         ctx.restore();
       }
@@ -681,9 +713,32 @@ export class Renderer {
     for (const p of world.projectiles) {
       if (!p.alive) continue;
       if (p.team === 'player') {
-        this.sprite(p.kind, p.pos.x, p.pos.y, p.kind === 'missile' ? 16 : 12,
+        // Interceptors trail a faint tracking line to their prey, so it is
+        // clear which missile each Aegis launch has claimed.
+        if (p.prey?.alive) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(126,240,192,0.28)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([3, 4]);
+          ctx.beginPath();
+          ctx.moveTo(p.pos.x, p.pos.y);
+          ctx.lineTo(p.prey.pos.x, p.prey.pos.y);
+          ctx.stroke();
+          ctx.restore();
+        }
+        this.sprite(p.kind, p.pos.x, p.pos.y, p.kind === 'missile' || p.kind === 'slug' ? 16 : 12,
                     p.angle + Math.PI / 2);
         continue;
+      }
+      // Locked by an Aegis: a mint reticle marks it as already handled.
+      if (p.doomed) {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(126,240,192,0.85)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(p.pos.x, p.pos.y, 8, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
       }
       // Enemy fire is drawn rather than sprited so it reads red at a glance;
       // tinting a rasterised sprite on a 2D canvas is not worth the cost.
@@ -748,6 +803,30 @@ export class Renderer {
     ctx.fillStyle = locked ? 'rgba(160,175,195,0.9)' : '#7ef0c0';
     ctx.fillText(locked ? 'last structure' : `+${s.refundValue()}`, s.pos.x, s.pos.y - r - 6);
     ctx.restore();
+  }
+
+  /** Sandbox: the enemy about to be spawned, and the scatter area for a group. */
+  _drawSpawnGhost(ctx, world, ui) {
+    const def = world.data.enemies?.[ui.spawnKey];
+    if (!def || !ui.pointer) return;
+    const { x, y } = ui.pointer;
+    const r = def.radius ?? 12;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,90,77,0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 6]);
+    ctx.beginPath();
+    ctx.arc(x, y, ui.spawnCount > 1 ? 60 + r : r + 6, 0, Math.PI * 2);
+    ctx.stroke();
+    if (ui.spawnCount > 1) {
+      ctx.setLineDash([]);
+      ctx.font = '600 12px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ff9a8b';
+      ctx.fillText(`×${ui.spawnCount}`, x, y - 66 - r);
+    }
+    ctx.restore();
+    this.sprite(def.sprite, x, y, r * 2.4, 0, 0.6);
   }
 
   /** Ghost of the structure being placed, plus the links it would form. */

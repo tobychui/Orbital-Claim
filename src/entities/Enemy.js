@@ -77,14 +77,19 @@ export class Enemy extends Entity {
     this.cooldown -= dt;
     if (this.cooldown > 0) return;
     this.cooldown = 1 / this.fireRate;
+    // Ships default to bolts; a `projectile: "missile"` entry in the data swaps
+    // in slow homing ordnance instead — which an Aegis pulser can shoot down.
+    const missile = this.def.projectile === 'missile';
     world.spawnProjectile({
-      kind: 'bolt',
+      kind: missile ? 'missile' : 'bolt',
       team: 'enemy',
       x: this.pos.x + Math.cos(this.angle) * this.radius,
       y: this.pos.y + Math.sin(this.angle) * this.radius,
       target: this.target,
       damage: this.attackDamage,
-      speed: 420,
+      splash: missile ? this.def.missileSplash ?? 0 : 0,
+      speed: this.def.projectileSpeed ?? (missile ? 200 : 420),
+      homing: missile,
     });
   }
 

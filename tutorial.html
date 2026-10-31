@@ -77,6 +77,19 @@
   @keyframes bolt { 0%{transform:translateX(0);opacity:0} 12%{opacity:1} 100%{transform:translateX(96px);opacity:0} }
   .bolt2 { animation-delay:.3s; } .bolt3 { animation-delay:.6s; }
 
+  .far { animation:far 0.8s linear infinite; }
+  @keyframes far { 0%{transform:translateX(0);opacity:0} 10%{opacity:1} 100%{transform:translateX(230px);opacity:0} }
+
+  /* Aegis: an enemy missile closes, an interceptor meets it, it pops. */
+  .inmis { animation:inmis 2.4s linear infinite; }
+  @keyframes inmis { 0%{transform:translateX(0);opacity:0} 8%{opacity:1} 55%{transform:translateX(-96px);opacity:1} 56%,100%{transform:translateX(-96px);opacity:0} }
+  .icpt { animation:icpt 2.4s linear infinite; }
+  @keyframes icpt { 0%,25%{transform:translateX(0);opacity:0} 26%{opacity:1} 55%{transform:translateX(92px);opacity:1} 56%,100%{transform:translateX(92px);opacity:0} }
+  .pop { animation:pop 2.4s ease-out infinite; transform-box:fill-box; transform-origin:center; }
+  @keyframes pop { 0%,54%{transform:scale(.2);opacity:0} 57%{transform:scale(.7);opacity:1} 85%,100%{transform:scale(1.5);opacity:0} }
+  .drain { animation:drain 2.4s steps(1) infinite; }
+  @keyframes drain { 0%,55%{opacity:.25} 56%,100%{opacity:1} }
+
   .grow { animation:grow 2.4s ease-out infinite; transform-origin:center; }
   @keyframes grow { 0%{transform:scale(.2);opacity:.9} 70%{opacity:0} 100%{transform:scale(1.6);opacity:0} }
 
@@ -261,7 +274,7 @@
     <div>
       <h2>Building</h2>
       <p class="lede">Out of reach = no power = no progress.</p>
-      <p class="sub">Reach it with a relay and it starts itself.</p>
+      <p class="sub">Reach it with a relay and it starts itself. Lost one? Click <b>Show</b> on the &ldquo;isolated&rdquo; warning to jump to it.</p>
     </div>
     <div class="stage">
       <svg viewBox="0 0 560 130">
@@ -337,7 +350,7 @@
   <section class="card">
     <div>
       <h2>Weapons</h2>
-      <p class="lede">Beam never misses. Pulser out-damages. Missiles splash.</p>
+      <p class="lede">Beam never misses. Pulser outranges. Missiles splash.</p>
       <p class="sub">Missiles spend minerals per shot.</p>
     </div>
     <div class="stage">
@@ -357,7 +370,7 @@
           <rect class="bolt bolt3" x="68" y="82" width="11" height="3.4" rx="1.7"/>
         </g>
         <use href="assets/sprites.svg#fighter" x="146" y="62" width="40" height="40"/>
-        <text class="lab" x="200" y="88">rapid bolts</text>
+        <text class="lab" x="200" y="88">long-range bolts</text>
 
         <!-- missile -->
         <use href="assets/sprites.svg#missile-bay" x="24" y="106" width="44" height="44"/>
@@ -382,10 +395,10 @@
       <div class="chips">
         <span class="chip"><svg viewBox="0 0 64 64"><use href="assets/sprites.svg#fighter"/></svg><b>Fighter</b> weaves</span>
         <span class="chip"><svg viewBox="0 0 64 64"><use href="assets/sprites.svg#swarmer"/></svg><b>Swarmer</b> many</span>
-        <span class="chip"><svg viewBox="0 0 64 64"><use href="assets/sprites.svg#missile-ship"/></svg><b>Missile</b> outranges lasers</span>
+        <span class="chip"><svg viewBox="0 0 64 64"><use href="assets/sprites.svg#missile-ship"/></svg><b>Missile</b> outranges lasers, homing shots</span>
         <span class="chip"><svg viewBox="0 0 64 64"><use href="assets/sprites.svg#exploder"/></svg><b>Exploder</b> rams</span>
         <span class="chip"><svg viewBox="0 0 64 64"><use href="assets/sprites.svg#ring-ship"/></svg><b>Ring</b> shielded</span>
-        <span class="chip"><svg viewBox="0 0 64 64"><use href="assets/sprites.svg#mothership"/></svg><b>Mothership</b> boss</span>
+        <span class="chip"><svg viewBox="0 0 64 64"><use href="assets/sprites.svg#mothership"/></svg><b>Mothership</b> boss, fires missiles</span>
       </div>
     </div>
   </section>
@@ -433,7 +446,7 @@
     <div>
       <h2>Upgrades</h2>
       <p class="lede">More blades, more power, same footprint.</p>
-      <p class="sub">Batteries upgrade once, to 4&times; storage.</p>
+      <p class="sub">Batteries upgrade once, to 4&times; storage. Weapons and repair stations pick a <b>path</b> on their first upgrade &mdash; and stay on it.</p>
     </div>
     <div class="stage">
       <svg viewBox="0 0 560 130">
@@ -455,6 +468,57 @@
         <use href="assets/sprites.svg#battery"   x="440" y="38" width="46" height="46"/>
         <use href="assets/sprites.svg#battery-2" x="496" y="38" width="46" height="46"/>
         <text class="lab warn" x="492" y="112" text-anchor="middle">4&times;</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- ==================================================== PULSER PATHS === -->
+  <section class="card">
+    <div>
+      <h2>Pulser Paths</h2>
+      <p class="lede">Pick one: snipe, shred, or shield.</p>
+      <p class="sub">Aegis stops shooting ships. It shoots down enemy missiles instead and never misses, but drains heavy power recharging after each one. Its upgrades shorten the recharge.</p>
+    </div>
+    <div class="stage">
+      <svg viewBox="0 0 560 162">
+        <!-- lance -->
+        <use href="assets/sprites.svg#pulser-lance2" x="24" y="6" width="44" height="44"/>
+        <g fill="#c4ecff">
+          <rect class="far" x="66" y="26.5" width="16" height="3" rx="1.5"/>
+        </g>
+        <use href="assets/sprites.svg#ring-ship" x="290" y="10" width="36" height="36"/>
+        <text class="lab" x="344" y="24">Lance</text>
+        <text class="lab good" x="344" y="38">extreme range, heavy slugs</text>
+
+        <!-- barrage -->
+        <use href="assets/sprites.svg#pulser-barrage4" x="24" y="56" width="44" height="44"/>
+        <g fill="#4fd1e0">
+          <rect class="bolt"       x="68" y="72" width="10" height="3" rx="1.5"/>
+          <rect class="bolt bolt2" x="68" y="77" width="10" height="3" rx="1.5"/>
+          <rect class="bolt bolt3" x="68" y="82" width="10" height="3" rx="1.5"/>
+        </g>
+        <use href="assets/sprites.svg#swarmer" x="160" y="62" width="24" height="24"/>
+        <use href="assets/sprites.svg#swarmer" x="178" y="74" width="22" height="22"/>
+        <text class="lab" x="344" y="74">Barrage</text>
+        <text class="lab good" x="344" y="88">4 barrels, a wall of bolts</text>
+
+        <!-- aegis -->
+        <use href="assets/sprites.svg#pulser-aegis2" x="24" y="108" width="44" height="44"/>
+        <g class="inmis">
+          <rect x="256" y="128.4" width="12" height="3.2" fill="#ffc65c"/>
+          <circle cx="262" cy="130" r="7" fill="none" stroke="#7ef0c0" stroke-width="1.2"/>
+        </g>
+        <g class="icpt">
+          <use href="assets/sprites.svg#interceptor" x="64" y="122" width="16" height="16"
+               transform="rotate(90 72 130)"/>
+        </g>
+        <circle class="pop" cx="164" cy="130" r="14" fill="var(--amber)" opacity=".7"/>
+        <text class="lab" x="344" y="124">Aegis</text>
+        <text class="lab good" x="344" y="138">intercepts missiles</text>
+        <g class="drain">
+          <use href="assets/sprites.svg#icon-power" x="342" y="142" width="13" height="13"/>
+          <text class="lab warn" x="358" y="152">power spike per intercept</text>
+        </g>
       </svg>
     </div>
   </section>

@@ -33,6 +33,10 @@ export class PowerGrid {
     this.demand = 0;
     this.ratio = 1;
     this.maxLoad = 0;
+
+    // Sandbox: any island with a finished source runs at full rate whatever
+    // its demand. Connectivity still matters, so isolation can be debugged.
+    this.unlimited = false;
   }
 
   markDirty() {
@@ -256,15 +260,16 @@ export class PowerGrid {
     this.maxLoad = 0;
 
     for (const island of this.islands) {
+      island.unlimited = this.unlimited;
       island.solve(dt);
       this.supply += island.supply;
       this.demand += island.demand;
       if (island.maxLoad > this.maxLoad) this.maxLoad = island.maxLoad;
     }
 
-    this.ratio = this.demand > 0
-      ? Math.min(1, (this.supply + this.batteryOutput) / this.demand)
-      : 1;
+    this.ratio = this.unlimited || this.demand <= 0
+      ? 1
+      : Math.min(1, (this.supply + this.batteryOutput) / this.demand);
   }
 
   get batteryOutput() {
@@ -351,6 +356,14 @@ export class Island {
     // Batteries stand between a spike and a brownout.
     this.batteryOutput = 0;
     this.batteryIntake = 0;
+
+    if (this.unlimited) {
+      for (const b of batteries) b.idle();
+      this.ratio = 1;
+      for (const s of this.order) s.supplyRatio = 1;
+      this._computeFlow();
+      return;
+    }
     const deficit = this.demand - this.supply;
 
     if (deficit > 0.0001) {

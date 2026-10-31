@@ -9,6 +9,8 @@ export class Economy {
   constructor(cfg) {
     this.minerals = cfg?.start ?? 300;
     this.totalMined = 0;
+    // Sandbox: everything is affordable and nothing is deducted.
+    this.infinite = false;
 
     this._window = [];
     this._windowTime = 0;
@@ -26,11 +28,12 @@ export class Economy {
   }
 
   canAfford(cost) {
-    return this.minerals >= cost;
+    return this.infinite || this.minerals >= cost;
   }
 
   spend(cost) {
     if (!this.canAfford(cost)) return false;
+    if (this.infinite) return true;
     this.minerals -= cost;
     return true;
   }
